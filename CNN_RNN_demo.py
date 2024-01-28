@@ -44,14 +44,37 @@ model.summary()
 early_stopping = EarlyStopping(monitor='val_accuracy', min_delta=0.0001, patience=5, verbose=1, mode='auto')
 
 # Train the model with a specified number of epochs
-model.fit(X_train, y_train, epochs=50, batch_size=64, validation_data=(X_test, y_test))
+history = model.fit(X_train, y_train, epochs=50, batch_size=64, validation_data=(X_test, y_test), callbacks=[early_stopping])
 
 # heatmap = make_gradcam_heatmap(your_test_image_array, your_model, 'last_conv_layer_name')
 # display_gradcam(your_test_image_array, heatmap)
 
+# Plotting the loss function over time
+plt.figure(figsize=(12, 6))
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Loss Function Over Time')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
 # Evaluate the model
 accuracy = model.evaluate(X_test, y_test)[1]
 print("Accuracy:", accuracy)
+
+# Predicting the Test set results
+y_pred = model.predict(X_test)
+y_pred_classes = np.argmax(y_pred, axis=1)
+
+# Making the Confusion Matrix
+cm = confusion_matrix(y_test, y_pred_classes)
+plt.figure(figsize=(10, 8))
+sns.heatmap(cm, annot=True, fmt="d", cmap='Blues')
+plt.title('Confusion Matrix')
+plt.ylabel('True Label')
+plt.xlabel('Predicted Label')
+plt.show()
 
 y_pred = model.predict(X_test)
 y_pred_classes = np.argmax(y_pred, axis=1)
